@@ -57,7 +57,7 @@
                             </div>
                             <div class="section-title">Rules</div>
                             <div class="form-group full-width">
-                                <select id="rules-preset">
+                                <select id="rules">
                                     <option value="FIDE">Fide</option>
                                     <option value="USCF">USCF</option>
                                     <option value="CUSTOM">Custom</option>
@@ -75,10 +75,26 @@
                     </div>
 
                     <!--Add Teams and playerss entering-->
+                    <div class="card setup-card shadow-md">
+                        <h2>Teams verwalten</h2>
+                        <div class="team-input-row">
+                            <input type="text" id="new-team-name" placeholder="New Team"
+                                onkeydown="if (event.key === 'Enter') addTeam();"></input>
+                            <button class="btn primary" onclick="addTeam()">+ Add</button>
+                        </div>
+                        <ul id="team-list" class="team-list">
+
+                        </ul>
+                        <div class="actions" id="team-actions">
+                            <button class="btn success large" onclick="startTournament()" id="start-tram-btn">Start
+                                Tournament</button>
+                        </div>
+                    </div>
                 </div>
             </section>
         </main>
     </div>
+    <script src="setup.js"></script>
 </body>
 
 </html>
