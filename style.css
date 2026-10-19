@@ -1,26 +1,60 @@
 :root {
     --primary: #3b82f6;
     --primary-hover: #2563eb;
-    --success: #7dc947;
+    --success: #10b981;
     --danger: #ef4444;
     --bg: #f1f5f9;
-    -card-bg: #fff;
+    --card-bg: #fff;
     --text: #111111;
     --text-muted: #8c8b8b;
     --title: #b2cdd7;
     --border: #eae9e9;
-    --card-bg: #fff;
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0/.05);
+    --accent: #dbd4d4;
 }
 
-* {
+*,
+body {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-    margin: 0;
     background: var(--bg);
     color: var(--text);
+}
+
+header {
+    background: var(--card-bg);
+    padding: 1rem 3rem;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+    gap: 1rem;
+    display: grid;
+    z-index: 100;
+}
+
+header h1 {
+    font-size: 1.25rem;
+    margin-left: 3rem;
+    cursor: pointer;
+}
+
+.nav.links,
+.nav-links {
+    background: var(--accent);
+    border-radius: 10px;
+    justify-self: center;
+}
+
+.nav-btn {
+    background: transparent;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    color: var(--text-muted);
+    cursor: pointer;
 }
 
 .view.active {

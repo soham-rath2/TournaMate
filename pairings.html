@@ -12,9 +12,13 @@
 <body>
     <header>
         <h1>TournaMate</h1>
-        <nav class="nav-links">
-            <a href="index.html">Tournament Setup</a>
-        </nav>
+        <div class="nav-links">
+            <button class="nav-btn" id="nav-manager-tournaments" onclick="">Tournaments</button>
+            <button class="nav-btn" data-target="setup" id="nav-setup">Setup</button>
+            <button class="nav-btn" data-target="pairings" id="nav-pairings">Pairings</button>
+            <button class="nav-btn" data-target="results" id="nav-results">Results</button>
+            <button class="nav-btn" data-target="standings" id="nav-standings">Standings</button>
+        </div>
     </header>
 
     <main class="pairing-page">
@@ -40,7 +44,7 @@
             <div id="pairings-list"></div>
         </section>
 
-        <section class="card">
+        <section class="card" id="standings">
             <h2>Standings</h2>
             <div class="table-wrapper">
                 <table class="standings-table">
@@ -52,6 +56,7 @@
                             <th>Wins</th>
                             <th>Draws</th>
                             <th>Losses</th>
+                            <th>Points</th>
                         </tr>
                     </thead>
                     <tbody id="standings-body"></tbody>

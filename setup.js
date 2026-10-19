@@ -209,8 +209,8 @@ function startTournament() {
     }
 
     saveSetup();
-
-    alert("Tournament setup saved.");
+    localStorage.removeItem("TournaMate-pairings");
+    window.location.href = "pairings.html";
 }
 
 participantForm.addEventListener("submit", (event) => {
@@ -230,6 +230,38 @@ document.querySelectorAll(
 ).forEach((input) => {
     input.addEventListener("change", saveSetup);
 });
+
+function setupNavigation() {
+    const navPairings = document.getElementById("nav-pairings");
+    if (navPairings) {
+        navPairings.addEventListener("click", () => {
+            window.location.href = "pairings.html";
+        });
+    }
+
+    const navResults = document.getElementById("nav-results");
+    if (navResults) {
+        navResults.addEventListener("click", () => {
+            window.location.href = "pairings.html";
+        });
+    }
+
+    const navStandings = document.getElementById("nav-standings");
+    if (navStandings) {
+        navStandings.addEventListener("click", () => {
+            window.location.href = "pairings.html#standings";
+        });
+    }
+
+    const navTournaments = document.getElementById("nav-manager-tournaments");
+    if (navTournaments) {
+        navTournaments.addEventListener("click", () => {
+            window.location.href = "index.html";
+        });
+    }
+}
+
+setupNavigation();
 
 function loadSetup() {
     const setup = getSavedSetup();
