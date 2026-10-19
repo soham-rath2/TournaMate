@@ -1,46 +1,44 @@
 "use strict";
 
+const modeIputs = document.querySelectorAll('input[name="tournament-mode"]');
+
+const participantHeading = document.getElementById("participant-heading");
+const participantForm = document.getElementById("participant-form");
+const participantName = document.getElementById("participant-name");
+const participantList = document.getElementById("participant-list");
+
 function getTournamentMode() {
-    const selected = document.querySelector('input[name="tournament-mode":checked');
-    return selected ? selected.value : "TEAM";
+    return document.querySelector('input[name="tournament-mode"]:checked').value;
 }
 
-function saveSetup() {
-    const setup = {
-        tournamentName: document.getElementById("tournament-name").value,
-        mode: getTournamentMode(),
-        pairingSystem: document.getElementById("pairing-system").value,
-        boards: document.getElementById("total-boards").value,
-        rounds: document.getElementById("total-rounds").value,
-        rules: document.getElementById("rules").value,
-        pointsWin: document.getElementById("points-win").value,
-        pointsDraw: document.getElementById("points-draw").value,
-        teams: [...document.querySelector("#team-list li")].map((item) => item.dataset.name),
-        players: [...document.querySelector("#player-list li")].map((item) => item.dataset.name),
-    }
-
-    localStorage.setItem("TournaMate-setup", JSON.stringify(setup));
+function getParticipantType() {
+    return getTournamentMode() === "TEAM" ? "Team" : "Player";
 }
 
-function addParticipant(inputId, listId, type) {
-    const input = document.getElementById(inputId);
-    const list = document.getElementById(listId);
-    const name = input.value.trim();
+function updateParticipantMode() {
+    const type = getParticipantType();
 
-    if (!name) {
-        alert(`Please enter a ${type}.`)
-        input.focus();
-        return;
-    }
+    participantHeading.textContent = `Add ${type}`;
+    participantName.placeholder = `New ${type}`;
+    participantName.setAttribute("aria-label", `New ${type} name`);
 
-    const existingNames = [...list.querySelectorAll("li")].map((item) => item.dataset.name.toLocaleLowerCase());
+    renderParticipants();
+    saveSetup();
+}
 
-    if (existingNames.includes(name.toLocaleLowerCase())) {
-        alert(`${type} already exists.`);
-        input.focus();
-        return;
-    }
+function renderParticipants() {
+    const setup = JSON.parse(localStorage.getItem("TournaMate-setup") || "{}");
 
+    participantList.replaceChildren();
+
+    const participants = setup.mode === getTournamentMode() ? setup.participants || [] : [];
+
+    participants.forEach((name) => {
+        createParticipantItem(name);
+    });
+}
+
+function createParticipantItem(name) {
     const item = document.createElement("li");
     item.dataset.name = name;
 
@@ -51,43 +49,76 @@ function addParticipant(inputId, listId, type) {
     removeButton.type = "button";
     removeButton.className = "delete-btn";
     removeButton.textContent = "x";
-    removeButton.setAttribute("aria-label", `remove ${name}`)
+    removeButton.setAttribute("aria-label", `remove ${name}`);
 
     removeButton.addEventListener("click", () => {
         item.remove();
         saveSetup();
-    })
+    });
 
     item.append(nameLabel, removeButton);
-    list.appendChild(item);
+    participantList.appendChild(item);
+}
 
-    input.value = "";
-    input.focus();
+function saveSetup() {
+    const setup = {
+        tournamentName: document.getElementById("tournament-name").value.trim(),
+        mode: getTournamentMode(),
+        pairingSystem: document.getElementById("pairing-system").value,
+        boards: Number(document.getElementById("boards-count").value),
+        rounds: Number(document.getElementById("total-rounds").value),
+        rules: document.getElementById("rules").value,
+        pointsWin: Number(document.getElementById("points-win").value),
+        pointsDraw: Number(document.getElementById("points-draw").value),
+        participants: [...participantList.querySelectorAll("li")].map((item) => item.dataset.name)
+    };
+
+    localStorage.setItem("TournaMate-setup", JSON.stringify(setup));
+}
+
+
+function addParticipant() {
+    const type = getParticipantType();
+    const name = participantName.value.trim();
+
+    if (!name) {
+        alert(`Please enter a ${type.toLowerCase()} name.`);
+        participantName.focus();
+        return;
+    }
+
+    const existingNames = [
+        ...participantList.querySelectorAll("li")
+    ].map(item => item.dataset.name.toLowerCase());
+
+    if (existingNames.includes(name.toLowerCase())) {
+        alert(`${type} already exists.`);
+        participantName.focus();
+        return;
+    }
+
+    createParticipantItem(name);
+
+    participantName.value = "";
+    participantName.focus();
 
     saveSetup();
 }
 
-function addTeam() {
-    addParticipant("new-team-name", "team-list", "team-name");
-}
-
-function addPlayer() {
-    addParticipant("new-player-name", "player-list", "player-name");
-}
-
 function startTournament() {
     const name = document.getElementById("tournament-name").value.trim();
-    const teams = document.getElementById("team-list").querySelector("li");
+    const participants = participantList.querySelectorAll("li");
     const rounds = Number(document.getElementById("total-rounds").value);
     const boards = Number(document.getElementById("boards-count").value);
+    const type = getParticipantType();
 
     if (!name) {
         alert("Please enter a name!");
         return;
     }
 
-    if (teams.length < 2) {
-        alert("Atleast 2 teams needed");
+    if (participants.length < 2) {
+        alert(`Atleast 2 ${type.toLowerCase()}s needed`);
         return;
     }
 
@@ -105,29 +136,18 @@ function startTournament() {
     alert("Tournament Setup was saved.");
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    const settings = [
-        "tournament-name",
-        "pairing-system",
-        "boards-count",
-        "total-rounds",
-        "rules",
-        "points-win",
-        "points-draw",
-        "tournament-name-singles",
-        "pairing-system-singles",
-        "boards-count-singles",
-        "total-rounds-singles",
-        "rules-singles",
-        "points-win-singles",
-        "points-draw-singles"
-    ];
+participantForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    addParticipant();
+});
 
-    settings.forEach((id) => {
-        const element = document.getElementById(id);
+modeInputs.forEach((input) => {
+    input.addEventListener("change", updateParticipantMode);
+});
 
-        if (element) {
-            element.addEventListener("change", saveSetup);
-        }
-    })
+document.querySelectorAll("#tournament-name, #pairing-system, #boards-count, #total-rounds, #rules, #points-win, #points-draw").forEach((input) => {
+    input.addEventListener("change", saveSetup);
 })
+
+
+updateParticipantMode();

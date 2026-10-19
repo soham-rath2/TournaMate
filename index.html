@@ -74,19 +74,19 @@
                         </div>
                     </div>
 
-                    <!--Add Teams and playerss entering-->
+                    <!--Add Teams and players entering-->
                     <div class="card setup-card shadow-md">
-                        <h2>Teams verwalten</h2>
-                        <div class="team-input-row">
-                            <input type="text" id="new-team-name" placeholder="New Team"
-                                onkeydown="if (event.key === 'Enter') addTeam();"></input>
-                            <button class="btn primary" onclick="addTeam()">+ Add</button>
-                        </div>
-                        <ul id="team-list" class="team-list">
+                        <h2 id="participant-heading">Add Teams</h2>
+                        <form id="participant-form" class="team-input-row">
+                            <input type="text" id="participant-name" placeholder="New Team"></input>
+                            <button type="submit" class="btn primary">+ Add</button>
+                        </form>
+                        <ul id="participant-list" class="team-list">
 
                         </ul>
-                        <div class="actions" id="team-actions">
-                            <button class="btn success large" onclick="startTournament()" id="start-tram-btn">Start
+                        <div class="actions">
+                            <button class="btn success large" id="start-tournament-btn" type="button"
+                                onclick="startTournament(); ">Start
                                 Tournament</button>
                         </div>
                     </div>
