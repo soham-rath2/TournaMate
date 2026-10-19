@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -15,116 +14,103 @@
         <div class="nav-links"></div>
     </header>
 
-    <div id="app">
-        <main>
-            <section id="setup" class="view active">
-                <div class="setup-grid">
+    <main>
+        <section id="setup" class="view active">
+            <div class="setup-grid">
 
-                    <div class="card setup-card shadow-md">
-                        <h2>Tournament Setup</h2>
+                <div class="card setup-card shadow-md">
+                    <h2>Tournament Setup</h2>
 
-                        <div class="settings-grid">
-                            <div class="section-title">General</div>
+                    <div class="settings-grid">
+                        <div class="section-title">General</div>
 
-                            <div class="form-group full-width">
-                                <label for="tournament-name">Tournament name</label>
-                                <input type="text" id="tournament-name"
-                                    placeholder="Tournament name">
-                            </div>
+                        <div class="form-group full-width">
+                            <label for="tournament-name">Tournament name</label>
+                            <input type="text" id="tournament-name" placeholder="Tournament name">
+                        </div>
 
-                            <div class="form-group full-width">
-                                <label>Tournament mode</label>
+                        <div class="form-group full-width">
+                            <label>Tournament mode</label>
 
-                                <div class="option-group" role="radiogroup">
-                                    <label class="option-pill">
-                                        <input type="radio"
-                                            name="tournament-mode"
-                                            value="TEAM" checked>
-                                        <span>Team Tournament</span>
-                                    </label>
+                            <div class="option-group" role="radiogroup">
+                                <label class="option-pill">
+                                    <input type="radio" name="tournament-mode" value="TEAM" checked>
+                                    <span>Team Tournament</span>
+                                </label>
 
-                                    <label class="option-pill">
-                                        <input type="radio"
-                                            name="tournament-mode"
-                                            value="SINGLES">
-                                        <span>Individual Tournament</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="section-title">Format</div>
-
-                            <div class="form-group">
-                                <label for="pairing-system">Pairing system</label>
-                                <select id="pairing-system">
-                                    <option value="SWISS">Swiss System</option>
-                                    <option value="ROUND_ROBBIN">Round Robin</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="boards-count">Boards/Games per Match</label>
-                                <input type="number" id="boards-count"
-                                    value="4" min="1" max="20">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="total-rounds">Number of Rounds</label>
-                                <input type="number" id="total-rounds"
-                                    value="6" min="1" max="20">
-                            </div>
-
-                            <div class="section-title">Rules</div>
-
-                            <div class="form-group full-width">
-                                <label for="rules">Ruleset</label>
-                                <select id="rules">
-                                    <option value="FIDE">FIDE</option>
-                                    <option value="USCF">USCF</option>
-                                    <option value="CUSTOM">Custom</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="points-win">Points for a Win</label>
-                                <input type="number" id="points-win"
-                                    value="2" min="0" step="0.5">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="points-draw">Points for a Draw</label>
-                                <input type="number" id="points-draw"
-                                    value="1" min="0" step="0.5">
+                                <label class="option-pill">
+                                    <input type="radio" name="tournament-mode" value="SINGLES">
+                                    <span>Individual Tournament</span>
+                                </label>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="card setup-card shadow-md">
-                        <h2 id="participant-heading">Add Teams</h2>
+                        <div class="section-title">Format</div>
 
-                        <form id="participant-form" class="team-input-row">
-                            <input type="text" id="participant-name"
-                                placeholder="New Team" autocomplete="off">
+                        <div class="form-group">
+                            <label for="pairing-system">Pairing system</label>
+                            <select id="pairing-system">
+                                <option value="SWISS">Swiss System</option>
+                                <option value="ROUND_ROBBIN">Round Robin</option>
+                            </select>
+                        </div>
 
-                            <button type="submit" class="btn primary">
-                                + Add
-                            </button>
-                        </form>
+                        <div class="form-group">
+                            <label for="boards-count">Boards/Games per Match</label>
+                            <input type="number" id="boards-count" value="4" min="1" max="20">
+                        </div>
 
-                        <ul id="participant-list" class="team-list"></ul>
+                        <div class="form-group">
+                            <label for="total-rounds">Number of Rounds</label>
+                            <input type="number" id="total-rounds" value="6" min="1" max="20">
+                        </div>
 
-                        <div class="actions">
-                            <button class="btn success large"
-                                id="start-tournament-btn" type="button">
-                                Start Tournament
-                            </button>
+                        <div class="section-title">Rules</div>
+
+                        <div class="form-group full-width">
+                            <label for="rules">Ruleset</label>
+                            <select id="rules">
+                                <option value="FIDE">FIDE</option>
+                                <option value="USCF">USCF</option>
+                                <option value="CUSTOM">Custom</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="points-win">Points for a Win</label>
+                            <input type="number" id="points-win" value="2" min="0" step="0.5">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="points-draw">Points for a Draw</label>
+                            <input type="number" id="points-draw" value="1" min="0" step="0.5">
                         </div>
                     </div>
-
                 </div>
-            </section>
-        </main>
-    </div>
+
+                <div class="card setup-card shadow-md">
+                    <h2 id="participant-heading">Add Teams</h2>
+
+                    <form id="participant-form" class="team-input-row">
+                        <input type="text" id="participant-name" placeholder="New Team" autocomplete="off">
+
+                        <button type="submit" class="btn primary">
+                            + Add
+                        </button>
+                    </form>
+
+                    <ul id="participant-list" class="team-list"></ul>
+
+                    <div class="actions">
+                        <button class="btn success large" id="start-tournament-btn" type="button">
+                            Start Tournament
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
 
     <script src="setup.js"></script>
 </body>

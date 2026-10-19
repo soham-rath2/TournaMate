@@ -4,11 +4,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>TournaMate - Pairings</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="pairing.css">
 </head>
 
 <body>
+    <header>
+        <h1>TournaMate</h1>
+        <nav class="nav-links">
+            <a href="index.html">Tournament Setup</a>
+        </nav>
+    </header>
 
+    <main class="pairing-page">
+        <section class="card pairing-header">
+            <div>
+                <h2 id="tournament-title">Tournament Pairings</h2>
+                <p id="tournament-info"></p>
+            </div>
+
+            <div class="round-controls">
+                <label for="round-select">Round</label>
+                <select id="round-select"></select>
+
+                <button id="generate-round-btn" class="btn primary">
+                    Generate Next Round
+                </button>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 id="round-title">Round 1</h2>
+            <p id="round-status">Enter the results of each match.</p>
+            <div id="pairings-list"></div>
+        </section>
+
+        <section class="card">
+            <h2>Standings</h2>
+            <div class="table-wrapper">
+                <table class="standings-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th id="participant-column">Participants</th>
+                            <th>Played</th>
+                            <th>Wins</th>
+                            <th>Draws</th>
+                            <th>Losses</th>
+                        </tr>
+                    </thead>
+                    <tbody id="standings-body"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script src="pairing.js"></script>
 </body>
 
 </html>

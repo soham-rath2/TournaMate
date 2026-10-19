@@ -1,0 +1,25 @@
+.pairing-page {
+    margin: 2rem auto;
+    padding: 0 1.5rem 2rem;
+    display: grid;
+    gap: 1.5rem;
+}
+
+.round-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.round-controls label {
+    margin: 0;
+}
+
+.round-select {
+    width: auto;
+}
+
+#pairing-list {
+    display: grid;
+    gap: 1rem;
+}
