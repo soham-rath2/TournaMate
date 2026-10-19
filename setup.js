@@ -75,6 +75,36 @@ function addPlayer() {
     addParticipant("new-player-name", "player-list", "player-name");
 }
 
+function startTournament() {
+    const name = document.getElementById("tournament-name").value.trim();
+    const teams = document.getElementById("team-list").querySelector("li");
+    const rounds = Number(document.getElementById("total-rounds").value);
+    const boards = Number(document.getElementById("boards-count").value);
+
+    if (!name) {
+        alert("Please enter a name!");
+        return;
+    }
+
+    if (teams.length < 2) {
+        alert("Atleast 2 teams needed");
+        return;
+    }
+
+    if (!Number.isInteger(rounds)) {
+        alert("Please enter a valid number of rounds.");
+        return;
+    }
+
+    if (!Number.isInteger(boards)) {
+        alert("Please enter a valid amount of boards.");
+        return;
+    }
+
+    saveSetup();
+    alert("Tournament Setup was saved.");
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const settings = [
         "tournament-name",
