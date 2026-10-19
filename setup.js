@@ -1,39 +1,108 @@
+
 "use strict";
 
-const modeIputs = document.querySelectorAll('input[name="tournament-mode"]');
+const STORAGE_KEY = "TournaMate-setup";
+
+const modeInputs = document.querySelectorAll(
+    'input[name="tournament-mode"]'
+);
 
 const participantHeading = document.getElementById("participant-heading");
 const participantForm = document.getElementById("participant-form");
 const participantName = document.getElementById("participant-name");
 const participantList = document.getElementById("participant-list");
+const startButton = document.getElementById("start-tournament-btn");
 
 function getTournamentMode() {
-    return document.querySelector('input[name="tournament-mode"]:checked').value;
+    return document.querySelector(
+        'input[name="tournament-mode"]:checked'
+    ).value;
 }
 
 function getParticipantType() {
     return getTournamentMode() === "TEAM" ? "Team" : "Player";
 }
 
+function getSavedSetup() {
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    } catch {
+        return {};
+    }
+}
+
+function getParticipants() {
+    const setup = getSavedSetup();
+
+    return getTournamentMode() === "TEAM"
+        ? setup.teams || []
+        : setup.players || [];
+}
+
+function saveSetup() {
+    const setup = getSavedSetup();
+
+    setup.tournamentName = document
+        .getElementById("tournament-name").value.trim();
+
+    setup.mode = getTournamentMode();
+
+    setup.pairingSystem = document
+        .getElementById("pairing-system").value;
+
+    setup.boards = Number(
+        document.getElementById("boards-count").value
+    );
+
+    setup.rounds = Number(
+        document.getElementById("total-rounds").value
+    );
+
+    setup.rules = document.getElementById("rules").value;
+
+    setup.pointsWin = Number(
+        document.getElementById("points-win").value
+    );
+
+    setup.pointsDraw = Number(
+        document.getElementById("points-draw").value
+    );
+
+    setup.teams = setup.teams || [];
+    setup.players = setup.players || [];
+
+    if (getTournamentMode() === "TEAM") {
+        setup.teams = getCurrentList();
+    } else {
+        setup.players = getCurrentList();
+    }
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(setup));
+}
+
+function getCurrentList() {
+    return [...participantList.querySelectorAll("li")]
+        .map((item) => item.dataset.name);
+}
+
 function updateParticipantMode() {
     const type = getParticipantType();
 
-    participantHeading.textContent = `Add ${type}`;
+    participantHeading.textContent = `Add ${type}s`;
     participantName.placeholder = `New ${type}`;
-    participantName.setAttribute("aria-label", `New ${type} name`);
+    participantName.setAttribute(
+        "aria-label",
+        `New ${type} name`
+    );
 
     renderParticipants();
     saveSetup();
 }
 
 function renderParticipants() {
-    const setup = JSON.parse(localStorage.getItem("TournaMate-setup") || "{}");
-
     participantList.replaceChildren();
 
-    const participants = setup.mode === getTournamentMode() ? setup.participants || [] : [];
-
-    participants.forEach((name) => {
+    getParticipants().forEach((name) => {
         createParticipantItem(name);
     });
 }
@@ -48,8 +117,8 @@ function createParticipantItem(name) {
     const removeButton = document.createElement("button");
     removeButton.type = "button";
     removeButton.className = "delete-btn";
-    removeButton.textContent = "x";
-    removeButton.setAttribute("aria-label", `remove ${name}`);
+    removeButton.textContent = "×";
+    removeButton.setAttribute("aria-label", `Remove ${name}`);
 
     removeButton.addEventListener("click", () => {
         item.remove();
@@ -60,26 +129,9 @@ function createParticipantItem(name) {
     participantList.appendChild(item);
 }
 
-function saveSetup() {
-    const setup = {
-        tournamentName: document.getElementById("tournament-name").value.trim(),
-        mode: getTournamentMode(),
-        pairingSystem: document.getElementById("pairing-system").value,
-        boards: Number(document.getElementById("boards-count").value),
-        rounds: Number(document.getElementById("total-rounds").value),
-        rules: document.getElementById("rules").value,
-        pointsWin: Number(document.getElementById("points-win").value),
-        pointsDraw: Number(document.getElementById("points-draw").value),
-        participants: [...participantList.querySelectorAll("li")].map((item) => item.dataset.name)
-    };
-
-    localStorage.setItem("TournaMate-setup", JSON.stringify(setup));
-}
-
-
 function addParticipant() {
-    const type = getParticipantType();
     const name = participantName.value.trim();
+    const type = getParticipantType();
 
     if (!name) {
         alert(`Please enter a ${type.toLowerCase()} name.`);
@@ -87,18 +139,18 @@ function addParticipant() {
         return;
     }
 
-    const existingNames = [
-        ...participantList.querySelectorAll("li")
-    ].map(item => item.dataset.name.toLowerCase());
+    const exists = getCurrentList().some(
+        (existingName) =>
+            existingName.toLowerCase() === name.toLowerCase()
+    );
 
-    if (existingNames.includes(name.toLowerCase())) {
+    if (exists) {
         alert(`${type} already exists.`);
         participantName.focus();
         return;
     }
 
     createParticipantItem(name);
-
     participantName.value = "";
     participantName.focus();
 
@@ -106,34 +158,59 @@ function addParticipant() {
 }
 
 function startTournament() {
-    const name = document.getElementById("tournament-name").value.trim();
-    const participants = participantList.querySelectorAll("li");
-    const rounds = Number(document.getElementById("total-rounds").value);
-    const boards = Number(document.getElementById("boards-count").value);
+    const name = document
+        .getElementById("tournament-name").value.trim();
+
+    const rounds = Number(
+        document.getElementById("total-rounds").value
+    );
+
+    const boards = Number(
+        document.getElementById("boards-count").value
+    );
+
+    const pointsWin = Number(
+        document.getElementById("points-win").value
+    );
+
+    const pointsDraw = Number(
+        document.getElementById("points-draw").value
+    );
+
+    const participants = getCurrentList();
     const type = getParticipantType();
 
     if (!name) {
-        alert("Please enter a name!");
+        alert("Please enter a tournament name.");
         return;
     }
 
     if (participants.length < 2) {
-        alert(`Atleast 2 ${type.toLowerCase()}s needed`);
+        alert(`At least 2 ${type.toLowerCase()}s are required.`);
         return;
     }
 
-    if (!Number.isInteger(rounds)) {
-        alert("Please enter a valid number of rounds.");
+    if (!Number.isInteger(rounds) || rounds < 1 || rounds > 20) {
+        alert("Enter a valid number of rounds (1–20).");
         return;
     }
 
-    if (!Number.isInteger(boards)) {
-        alert("Please enter a valid amount of boards.");
+    if (!Number.isInteger(boards) || boards < 1 || boards > 20) {
+        alert("Enter a valid number of boards (1–20).");
+        return;
+    }
+
+    if (
+        !Number.isFinite(pointsWin) || pointsWin < 0 ||
+        !Number.isFinite(pointsDraw) || pointsDraw < 0
+    ) {
+        alert("Enter valid win and draw points.");
         return;
     }
 
     saveSetup();
-    alert("Tournament Setup was saved.");
+
+    alert("Tournament setup saved.");
 }
 
 participantForm.addEventListener("submit", (event) => {
@@ -145,9 +222,46 @@ modeInputs.forEach((input) => {
     input.addEventListener("change", updateParticipantMode);
 });
 
-document.querySelectorAll("#tournament-name, #pairing-system, #boards-count, #total-rounds, #rules, #points-win, #points-draw").forEach((input) => {
+startButton.addEventListener("click", startTournament);
+
+document.querySelectorAll(
+    "#tournament-name, #pairing-system, #boards-count, " +
+    "#total-rounds, #rules, #points-win, #points-draw"
+).forEach((input) => {
     input.addEventListener("change", saveSetup);
-})
+});
 
+function loadSetup() {
+    const setup = getSavedSetup();
 
-updateParticipantMode();
+    document.getElementById("tournament-name").value =
+        setup.tournamentName || "";
+
+    document.getElementById("pairing-system").value =
+        setup.pairingSystem || "SWISS";
+
+    document.getElementById("boards-count").value =
+        setup.boards ?? 4;
+
+    document.getElementById("total-rounds").value =
+        setup.rounds ?? 6;
+
+    document.getElementById("rules").value =
+        setup.rules || "FIDE";
+
+    document.getElementById("points-win").value =
+        setup.pointsWin ?? 2;
+
+    document.getElementById("points-draw").value =
+        setup.pointsDraw ?? 1;
+
+    const savedMode = setup.mode === "SINGLES" ? "SINGLES" : "TEAM";
+
+    document.querySelector(
+        `input[name="tournament-mode"][value="${savedMode}"]`
+    ).checked = true;
+
+    updateParticipantMode();
+}
+
+loadSetup();
