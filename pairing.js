@@ -25,13 +25,14 @@ function save() {
     localStorage.setItem(PAIRING_KEY, JSON.stringify(tournament));
 }
 
-function init() {
+function startPairings() {
+    selectedRound = 1;
     setup = load(SETUP_KEY);
 
     if (!setup || (!setup.tournamentName && !setup.teams?.length && !setup.players?.length)) {
         alert("Please set up your tournament first.");
-        window.location.href = "index.html";
-        return;
+        showView("setup");
+        return false;
     }
 
     mode = setup.mode || "TEAM";
@@ -39,8 +40,8 @@ function init() {
 
     if (participants.length < 2) {
         alert("At least 2 participants are required. Please add them in Setup.");
-        window.location.href = "index.html";
-        return;
+        showView("setup");
+        return false;
     }
 
     pointsWin = Number(setup.pointsWin ?? 2);
@@ -69,8 +70,7 @@ function init() {
         participantCol.textContent = mode === "SINGLES" ? "Players" : "Teams";
     }
 
-    // Setup navigation listeners
-    setupNavigation();
+    // Navigation between views is handled by setup.js
 
     // Populate round select
     updateRoundSelect();
@@ -87,60 +87,11 @@ function init() {
 
     const generateRoundBtn = document.getElementById("generate-round-btn");
     if (generateRoundBtn) {
-        generateRoundBtn.addEventListener("click", handleGenerateNextRound);
+        generateRoundBtn.onclick = handleGenerateNextRound;
     }
 
     render();
-}
-
-function setupNavigation() {
-    const navSetup = document.getElementById("nav-setup") || document.querySelector('[data-target="setup"]');
-    if (navSetup) {
-        navSetup.addEventListener("click", () => {
-            window.location.href = "index.html";
-        });
-    }
-
-    const navTournaments = document.getElementById("nav-manager-tournaments");
-    if (navTournaments) {
-        navTournaments.addEventListener("click", () => {
-            window.location.href = "index.html";
-        });
-    }
-
-    const navPairings = document.getElementById("nav-pairings") || document.querySelector('[data-target="pairings"]');
-    if (navPairings) {
-        navPairings.addEventListener("click", () => {
-            window.scrollTo({ top: 0, behavior: "smooth" });
-        });
-    }
-
-    const navResults = document.getElementById("nav-results") || document.querySelector('[data-target="results"]');
-    if (navResults) {
-        navResults.addEventListener("click", () => {
-            const pairingsList = document.getElementById("pairings-list");
-            if (pairingsList) {
-                pairingsList.scrollIntoView({ behavior: "smooth" });
-            }
-        });
-    }
-
-    const navStandings = document.getElementById("nav-standings") || document.querySelector('[data-target="standings"]');
-    if (navStandings) {
-        navStandings.addEventListener("click", () => {
-            const standingsSection = document.getElementById("standings");
-            if (standingsSection) {
-                standingsSection.scrollIntoView({ behavior: "smooth" });
-            }
-        });
-    }
-
-    const brand = document.querySelector("header h1");
-    if (brand) {
-        brand.addEventListener("click", () => {
-            window.location.href = "index.html";
-        });
-    }
+    return true;
 }
 
 function updateRoundSelect() {
@@ -522,8 +473,4 @@ function renderStandings() {
     });
 }
 
-if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-} else {
-    init();
-}
+window.startPairings = startPairings;

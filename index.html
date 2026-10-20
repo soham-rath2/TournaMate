@@ -6,14 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TournaMate</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="pairing.css">
 </head>
 
 <body>
     <header>
-        <h1>TournaMate</h1>
+        <h1><a href="#setup" id="nav-brand">TournaMate</a></h1>
         <div class="nav-links">
-            <button class="nav-btn" id="nav-manager-tournaments" onclick="">Tournaments</button>
-            <button class="nav-btn" data-target="setup" id="nav-setup">Setup</button>
+            <button class="nav-btn" id="nav-manager-tournaments">Tournaments</button>
+            <button class="nav-btn active" data-target="setup" id="nav-setup">Setup</button>
             <button class="nav-btn" data-target="pairings" id="nav-pairings">Pairings</button>
             <button class="nav-btn" data-target="results" id="nav-results">Results</button>
             <button class="nav-btn" data-target="standings" id="nav-standings">Standings</button>
@@ -21,7 +22,7 @@
     </header>
 
     <main>
-        <section id="setup" class="view active">
+        <section id="setup" class="view active" data-view="setup">
             <div class="setup-grid">
 
                 <div class="card setup-card shadow-md">
@@ -115,10 +116,59 @@
                 </div>
 
             </div>
+
         </section>
+
+        <section id="pairings-view" class="view" data-view="pairings">
+            <div class="pairing-page">
+                <section class="card pairing-header">
+                    <div>
+                        <h2 id="tournament-title">Tournament Pairings</h2>
+                        <p id="tournament-info"></p>
+                    </div>
+
+                    <div class="round-controls">
+                        <label for="round-select">Round</label>
+                        <select id="round-select"></select>
+
+                        <button id="generate-round-btn" class="btn primary">
+                            Generate Next Round
+                        </button>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h2 id="round-title">Round 1</h2>
+                    <p id="round-status">Enter the results of each match.</p>
+                    <div id="pairings-list"></div>
+                </section>
+
+                <section class="card" id="standings">
+                    <h2>Standings</h2>
+                    <div class="table-wrapper">
+                        <table class="standings-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th id="participant-column">Participants</th>
+                                    <th>Played</th>
+                                    <th>Wins</th>
+                                    <th>Draws</th>
+                                    <th>Losses</th>
+                                    <th>Points</th>
+                                </tr>
+                            </thead>
+                            <tbody id="standings-body"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </section>
+
     </main>
 
     <script src="setup.js"></script>
+    <script src="pairing.js"></script>
 </body>
 
 </html>

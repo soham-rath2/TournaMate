@@ -210,7 +210,7 @@ function startTournament() {
 
     saveSetup();
     localStorage.removeItem("TournaMate-pairings");
-    window.location.href = "pairings.html";
+    openPairings();
 }
 
 participantForm.addEventListener("submit", (event) => {
@@ -231,32 +231,75 @@ document.querySelectorAll(
     input.addEventListener("change", saveSetup);
 });
 
+function showView(name, activeTarget = name) {
+    document.querySelectorAll(".view").forEach((view) => {
+        view.classList.toggle("active", view.dataset.view === name);
+    });
+
+    document.querySelectorAll(".nav-btn[data-target]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.target === activeTarget);
+    });
+
+    window.scrollTo({ top: 0, behavior: "auto" });
+}
+
+function openPairings(anchorId, activeTarget = "pairings") {
+    showView("pairings", activeTarget);
+
+    if (typeof window.startPairings === "function" && !window.startPairings()) {
+        showView("setup");
+        return;
+    }
+
+    if (anchorId) {
+        const anchor = document.getElementById(anchorId);
+        if (anchor) {
+            anchor.scrollIntoView({ behavior: "smooth" });
+        }
+    }
+}
+
 function setupNavigation() {
+    const navTournaments = document.getElementById("nav-manager-tournaments");
+    if (navTournaments) {
+        navTournaments.addEventListener("click", () => {
+            showView("setup");
+        });
+    }
+
+    const navSetup = document.getElementById("nav-setup");
+    if (navSetup) {
+        navSetup.addEventListener("click", () => {
+            showView("setup");
+        });
+    }
+
     const navPairings = document.getElementById("nav-pairings");
     if (navPairings) {
         navPairings.addEventListener("click", () => {
-            window.location.href = "pairings.html";
+            openPairings();
         });
     }
 
     const navResults = document.getElementById("nav-results");
     if (navResults) {
         navResults.addEventListener("click", () => {
-            window.location.href = "pairings.html";
+            openPairings("pairings-list", "results");
         });
     }
 
     const navStandings = document.getElementById("nav-standings");
     if (navStandings) {
         navStandings.addEventListener("click", () => {
-            window.location.href = "pairings.html#standings";
+            openPairings("standings", "standings");
         });
     }
 
-    const navTournaments = document.getElementById("nav-manager-tournaments");
-    if (navTournaments) {
-        navTournaments.addEventListener("click", () => {
-            window.location.href = "index.html";
+    const brand = document.getElementById("nav-brand");
+    if (brand) {
+        brand.addEventListener("click", (event) => {
+            event.preventDefault();
+            showView("setup");
         });
     }
 }
