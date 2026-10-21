@@ -15,7 +15,7 @@
             <button class="nav-btn" id="nav-manager-tournaments">Tournaments</button>
             <button class="nav-btn active" data-target="setup" id="nav-setup">Setup</button>
             <button class="nav-btn" data-target="pairings" id="nav-pairings" disabled>Pairings</button>
-            <button class="nav-btn" data-target="results" id="nav-results" disabled>Results</button>
+            <button class="nav-btn" data-target="results" id="nav-results">Results</button>
             <button class="nav-btn" data-target="standings" id="nav-standings" disabled>Standings</button>
         </div>
         <div class="nav-actions">
@@ -168,7 +168,64 @@
                     </section>
                 </div>
             </section>
+            <section id="results-view" class="view" data-view="results">
+                <div class="pairing-page">
+                    <section class="card pairing-header">
+                        <div>
+                            <h2 id="results-tournament-title">Tournament Results</h2>
+                            <p id="results-tournament-info">View the results of each round!</p>
+                        </div>
 
+                        <div class="round-controls">
+                            <label for="results-round-select">Round</label>
+                            <select id="results-round-select"></select>
+                        </div>
+                    </section>
+                    <section class="card">
+                        <div class="round-header-row">
+                            <h2 id="results-round-title">Round 1 Results</h2>
+                            <span id="results-round-status" class="results-status-badge"></span>
+                        </div>
+                        <div id="results-list"></div>
+                    </section>
+                </div>
+            </section>
+            <section id="card">
+                <h2>Results Overview</h2>
+                <div class="results-summary">
+                    <div class="summary-item">
+                        <span>Total Matches</span>
+                        <strong id="total-matches">0</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Completed</span>
+                        <strong id="completed-matches">0</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Pending</span>
+                        <strong id="pending-matches">0</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Overview</span>
+                        <table id="leaderboard">
+                            <tr>
+                                <tb>
+
+                                </tb>
+                                <tb>
+
+                                </tb>
+                                <tb>
+
+                                </tb>
+                                <tb>
+
+                                </tb>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
     <script src="setup.js"></script>

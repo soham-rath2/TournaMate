@@ -7,6 +7,7 @@ let setup = null;
 let tournament = null;
 let participants = [];
 let selectedRound = 1;
+let resultsSelectedRound = 1;
 let pointsWin = 2;
 let pointsDraw = 1;
 let totalRounds = 6;
@@ -27,6 +28,7 @@ function save() {
 
 function startPairings() {
     selectedRound = 1;
+    resultsSelectedRound = 1;
     setup = load(SETUP_KEY);
 
     if (!setup || (!setup.tournamentName && !setup.teams?.length && !setup.players?.length)) {
@@ -49,7 +51,12 @@ function startPairings() {
     totalRounds = Number(setup.rounds || setup.totalRounds || 6);
     pairingSystem = setup.pairingSystem || "SWISS";
 
-    // Set page header and info
+    // Set page headers and info
+    const modeLabel = mode === "SINGLES" ? "Individual" : "Team";
+    const typeLabel = mode === "SINGLES" ? "Players" : "Teams";
+    const systemLabel = pairingSystem === "ROUND_ROBBIN" ? "Round Robin" : "Swiss System";
+    const infoText = `${modeLabel} Tournament • ${systemLabel} • ${totalRounds} Rounds • ${participants.length} ${typeLabel}`;
+
     const titleEl = document.getElementById("tournament-title");
     if (titleEl) {
         titleEl.textContent = setup.tournamentName
@@ -59,21 +66,25 @@ function startPairings() {
 
     const infoEl = document.getElementById("tournament-info");
     if (infoEl) {
-        const modeLabel = mode === "SINGLES" ? "Individual" : "Team";
-        const typeLabel = mode === "SINGLES" ? "Players" : "Teams";
-        const systemLabel = pairingSystem === "ROUND_ROBBIN" ? "Round Robin" : "Swiss System";
-        infoEl.textContent = `${modeLabel} Tournament • ${systemLabel} • ${totalRounds} Rounds • ${participants.length} ${typeLabel}`;
+        infoEl.textContent = infoText;
+    }
+
+    const resTitleEl = document.getElementById("results-tournament-title");
+    if (resTitleEl) {
+        resTitleEl.textContent = setup.tournamentName
+            ? `${setup.tournamentName} - Results`
+            : "Tournament Results";
+    }
+
+    const resInfoEl = document.getElementById("results-tournament-info");
+    if (resInfoEl) {
+        resInfoEl.textContent = infoText;
     }
 
     const participantCol = document.getElementById("participant-column");
     if (participantCol) {
         participantCol.textContent = mode === "SINGLES" ? "Players" : "Teams";
     }
-
-    // Navigation between views is handled by setup.js
-
-    // Populate round select
-    updateRoundSelect();
 
     // Load or initialize tournament pairings
     tournament = load(PAIRING_KEY);
@@ -85,12 +96,21 @@ function startPairings() {
         save();
     }
 
+    // Populate round selects
+    updateRoundSelect();
+    updateResultsRoundSelect();
+
     const generateRoundBtn = document.getElementById("generate-round-btn");
     if (generateRoundBtn) {
         generateRoundBtn.onclick = handleGenerateNextRound;
     }
 
+    if (typeof window.updateNavState === "function") {
+        window.updateNavState();
+    }
+
     render();
+    renderResults();
     return true;
 }
 
@@ -120,8 +140,38 @@ function updateRoundSelect() {
         if (!tournament.rounds[selectedRound]) {
             generateRound(selectedRound);
             save();
+            updateResultsRoundSelect();
         }
         render();
+    };
+}
+
+function updateResultsRoundSelect() {
+    const resultsRoundSelect = document.getElementById("results-round-select");
+    if (!resultsRoundSelect) return;
+
+    resultsRoundSelect.replaceChildren();
+
+    const maxRoundGenerated = tournament && tournament.rounds
+        ? Math.max(1, ...Object.keys(tournament.rounds).map(Number))
+        : 1;
+
+    for (let r = 1; r <= maxRoundGenerated; r++) {
+        const opt = document.createElement("option");
+        opt.value = r;
+        opt.textContent = `Round ${r}`;
+        resultsRoundSelect.appendChild(opt);
+    }
+
+    if (resultsSelectedRound > maxRoundGenerated) {
+        resultsSelectedRound = maxRoundGenerated;
+    }
+
+    resultsRoundSelect.value = resultsSelectedRound;
+
+    resultsRoundSelect.onchange = (e) => {
+        resultsSelectedRound = Number(e.target.value);
+        renderResults();
     };
 }
 
@@ -322,6 +372,10 @@ function generateRound(roundNum) {
 function handleGenerateNextRound() {
     const maxCurrentRound = Math.max(1, ...Object.keys(tournament.rounds).map(Number));
 
+    if (maxCurrentRound >= totalRounds) {
+        alert(`All ${totalRounds} scheduled rounds have been generated!`);
+        return;
+    }
     // Check if current matches are done
     const currentMatches = tournament.rounds[maxCurrentRound] || [];
     const pendingCount = currentMatches.filter((m) => m.p2 !== "BYE" && !m.result).length;
@@ -333,29 +387,32 @@ function handleGenerateNextRound() {
         if (!confirmGen) return;
     }
 
-    if (maxCurrentRound >= totalRounds) {
-        alert(`All ${totalRounds} scheduled rounds have been generated!`);
-        return;
-    }
-
     const nextRound = maxCurrentRound + 1;
     generateRound(nextRound);
     save();
 
     selectedRound = nextRound;
+    resultsSelectedRound = nextRound;
     updateRoundSelect();
+    updateResultsRoundSelect();
     render();
+    renderResults();
 }
 
 function setResult(roundNum, matchIndex, result) {
     if (!tournament.rounds[roundNum]) return;
+
     const match = tournament.rounds[roundNum][matchIndex];
     if (!match) return;
+
+    const validResults = ["1-0", "0.5-0.5", "0-1"];
+    if (!validResults.includes(result)) return;
 
     // Toggle off if clicking the already selected result
     match.result = match.result === result ? null : result;
     save();
     render();
+    renderResults();
 }
 
 function render() {
@@ -436,6 +493,119 @@ function render() {
     renderStandings();
 }
 
+function renderResults() {
+    const resultsRoundTitle = document.getElementById("results-round-title");
+    if (resultsRoundTitle) {
+        resultsRoundTitle.textContent = `Round ${resultsSelectedRound} Results`;
+    }
+
+    const resultsList = document.getElementById("results-list");
+    if (!resultsList) return;
+
+    resultsList.replaceChildren();
+
+    const matches = (tournament && tournament.rounds && tournament.rounds[resultsSelectedRound]) || [];
+
+    const statusEl = document.getElementById("results-round-status");
+    if (statusEl) {
+        if (matches.length === 0) {
+            statusEl.textContent = "No matches";
+            statusEl.className = "results-status-badge";
+        } else {
+            const completedCount = matches.filter((m) => m.p2 === "BYE" || m.result).length;
+            const isAllComplete = completedCount === matches.length;
+            statusEl.textContent = isAllComplete
+                ? `✓ All ${matches.length} matches completed`
+                : `${completedCount} of ${matches.length} matches completed`;
+            statusEl.className = `results-status-badge ${isAllComplete ? "complete" : ""}`;
+        }
+    }
+
+    if (matches.length === 0) {
+        const emptyMsg = document.createElement("p");
+        emptyMsg.className = "text-muted";
+        emptyMsg.textContent = "No matches or results for this round yet.";
+        resultsList.appendChild(emptyMsg);
+        return;
+    }
+
+    matches.forEach((match, idx) => {
+        const card = document.createElement("div");
+        card.className = "match-card";
+
+        const info = document.createElement("div");
+        info.className = "match-info";
+
+        const boardBadge = document.createElement("span");
+        boardBadge.className = "board-badge";
+        boardBadge.textContent = `Board ${idx + 1}`;
+
+        const isP1Win = match.result === "1-0" || match.p2 === "BYE";
+        const isP2Win = match.result === "0-1";
+
+        const p1Span = document.createElement("span");
+        p1Span.className = `match-participant p1 ${isP1Win ? "winner" : isP2Win ? "loser" : ""}`;
+        p1Span.textContent = match.p1;
+
+        const scoreSpan = document.createElement("span");
+        if (match.p2 === "BYE") {
+            scoreSpan.className = "result-score bye";
+            scoreSpan.textContent = "1 – 0 (BYE)";
+        } else if (match.result === "1-0") {
+            scoreSpan.className = "result-score win";
+            scoreSpan.textContent = "1 – 0";
+        } else if (match.result === "0-1") {
+            scoreSpan.className = "result-score win";
+            scoreSpan.textContent = "0 – 1";
+        } else if (match.result === "0.5-0.5") {
+            scoreSpan.className = "result-score draw";
+            scoreSpan.textContent = "½ – ½";
+        } else {
+            scoreSpan.className = "result-score pending";
+            scoreSpan.textContent = "Pending";
+        }
+
+        const p2Span = document.createElement("span");
+        p2Span.className = `match-participant p2 ${isP2Win ? "winner" : isP1Win ? "loser" : ""}`;
+        p2Span.textContent = match.p2;
+
+        info.append(boardBadge, p1Span, scoreSpan, p2Span);
+
+        const actions = document.createElement("div");
+        actions.className = "match-actions";
+
+        if (match.p2 === "BYE") {
+            const badge = document.createElement("span");
+            badge.className = "bye-badge";
+            badge.textContent = "BYE (Win)";
+            actions.appendChild(badge);
+        } else {
+            const btnP1 = document.createElement("button");
+            btnP1.type = "button";
+            btnP1.className = `btn-result ${match.result === "1-0" ? "active" : ""}`;
+            btnP1.textContent = `${match.p1} Win`;
+            btnP1.onclick = () => setResult(resultsSelectedRound, idx, "1-0");
+
+            const btnDraw = document.createElement("button");
+            btnDraw.type = "button";
+            btnDraw.className = `btn-result ${match.result === "0.5-0.5" ? "active" : ""}`;
+            btnDraw.textContent = "Draw";
+            btnDraw.onclick = () => setResult(resultsSelectedRound, idx, "0.5-0.5");
+
+            const btnP2 = document.createElement("button");
+            btnP2.type = "button";
+            btnP2.className = `btn-result ${match.result === "0-1" ? "active" : ""}`;
+            btnP2.textContent = `${match.p2} Win`;
+            btnP2.onclick = () => setResult(resultsSelectedRound, idx, "0-1");
+
+            actions.append(btnP1, btnDraw, btnP2);
+        }
+
+        card.append(info, actions);
+        resultsList.appendChild(card);
+    });
+}
+
 function renderStandings() {
     const standingsBody = document.getElementById("standings-body");
     if (!standingsBody) return;
@@ -474,3 +644,5 @@ function renderStandings() {
 }
 
 window.startPairings = startPairings;
+window.renderResults = renderResults;
+window.updateResultsRoundSelect = updateResultsRoundSelect;

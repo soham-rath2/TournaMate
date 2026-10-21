@@ -105,6 +105,8 @@ function renderParticipants() {
     getParticipants().forEach((name) => {
         createParticipantItem(name);
     });
+
+    updateNavState();
 }
 
 function createParticipantItem(name) {
@@ -123,6 +125,7 @@ function createParticipantItem(name) {
     removeButton.addEventListener("click", () => {
         item.remove();
         saveSetup();
+        updateNavState();
     });
 
     item.append(nameLabel, removeButton);
@@ -155,6 +158,7 @@ function addParticipant() {
     participantName.focus();
 
     saveSetup();
+    updateNavState();
 }
 
 function startTournament() {
@@ -210,6 +214,7 @@ function startTournament() {
 
     saveSetup();
     localStorage.removeItem("TournaMate-pairings");
+    updateNavState();
     openPairings();
 }
 
@@ -259,6 +264,43 @@ function openPairings(anchorId, activeTarget = "pairings") {
     }
 }
 
+function openResults(anchorId, activeTarget = "results") {
+    showView("results", activeTarget);
+
+    if (typeof window.startPairings === "function" && !window.startPairings()) {
+        showView("setup");
+        return;
+    }
+
+    if (typeof window.renderResults === "function") {
+        window.renderResults();
+    }
+
+    if (anchorId) {
+        const anchor = document.getElementById(anchorId);
+        if (anchor) {
+            anchor.scrollIntoView({ behavior: "smooth" });
+        }
+    }
+}
+
+function updateNavState() {
+    const setup = getSavedSetup();
+    const hasTournament = !!localStorage.getItem("TournaMate-pairings");
+    const count = setup ? ((setup.mode === "SINGLES" ? setup.players?.length : setup.teams?.length) || 0) : 0;
+    const canAccess = hasTournament || count >= 2;
+
+    const navPairings = document.getElementById("nav-pairings");
+    const navResults = document.getElementById("nav-results");
+    const navStandings = document.getElementById("nav-standings");
+
+    if (navPairings) navPairings.disabled = !canAccess;
+    if (navResults) navResults.disabled = !canAccess;
+    if (navStandings) navStandings.disabled = !canAccess;
+}
+
+window.updateNavState = updateNavState;
+
 function setupNavigation() {
     const navTournaments = document.getElementById("nav-manager-tournaments");
     if (navTournaments) {
@@ -284,7 +326,7 @@ function setupNavigation() {
     const navResults = document.getElementById("nav-results");
     if (navResults) {
         navResults.addEventListener("click", () => {
-            openPairings("pairings-list", "results");
+            openResults();
         });
     }
 
@@ -302,6 +344,8 @@ function setupNavigation() {
             showView("setup");
         });
     }
+
+    updateNavState();
 }
 
 setupNavigation();
