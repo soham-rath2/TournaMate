@@ -10,7 +10,7 @@
     --border-subtle: #edf2f7;
 
     --text: #0f172a;
-    --text-muted: #64748b;
+    --text-muted: #303339;
     --text-light: #94a3b8;
 
     --accent: #2563eb;
@@ -79,7 +79,7 @@ body {
 .app-header {
     background: var(--surface);
     border-bottom: 1px solid var(--border);
-    padding: 0.65rem 1.5rem;
+    padding: 0.75rem 1.5rem;
     position: sticky;
     top: 0;
     z-index: 50;
@@ -104,11 +104,11 @@ body {
     align-items: center;
     gap: 0.5rem;
     font-family: inherit;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     font-weight: 700;
     letter-spacing: -0.01em;
     cursor: pointer;
-    padding: 0.35rem 0.5rem;
+    padding: 0.5rem 0.5rem;
     border-radius: var(--radius-sm);
 }
 
@@ -123,10 +123,10 @@ body {
 .nav-tabs {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.3rem;
     background: var(--bg);
     border: 1px solid var(--border);
-    padding: 0.2rem;
+    padding: 0.3rem;
     border-radius: var(--radius-md);
 }
 
@@ -135,9 +135,9 @@ body {
     border: none;
     color: var(--text-muted);
     font-family: inherit;
-    font-size: 0.8125rem;
+    font-size: 0.9rem;
     font-weight: 500;
-    padding: 0.35rem 0.8rem;
+    padding: 0.5rem 0.8rem;
     border-radius: var(--radius-sm);
     cursor: pointer;
     transition: color 0.15s, background-color 0.15s;
@@ -222,7 +222,7 @@ body {
     border: 1px solid var(--border);
     color: var(--text);
     font-family: inherit;
-    font-size: 0.8125rem;
+    font-size: 0.9rem;
     font-weight: 500;
     padding: 0.45rem 0.85rem;
     border-radius: var(--radius-sm);
@@ -246,7 +246,7 @@ body {
 
 .btn-ghost {
     background: transparent;
-    border: none;
+    border: 2px solid var(--border-subtle);
     color: var(--text-muted);
     font-family: inherit;
     font-size: 0.8125rem;
@@ -263,7 +263,7 @@ body {
 }
 
 .btn-sm {
-    font-size: 0.75rem;
+    font-size: 1rem;
     padding: 0.3rem 0.6rem;
 }
 
@@ -343,7 +343,7 @@ body {
 
 .panel-header h2,
 .panel-meta h2 {
-    font-size: 1.125rem;
+    font-size: 1.5rem;
     font-weight: 700;
     letter-spacing: -0.015em;
     color: var(--text);
@@ -395,8 +395,8 @@ body {
 }
 
 label {
-    font-size: 0.78125rem;
-    font-weight: 600;
+    font-size: 0.9rem;
+    font-weight: 700;
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -465,7 +465,7 @@ textarea:focus {
     transition: background-color 0.15s, color 0.15s;
 }
 
-.radio-label input:checked + span {
+.radio-label input:checked+span {
     background: var(--surface);
     color: var(--text);
     font-weight: 600;
@@ -772,6 +772,7 @@ textarea:focus {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    align-items: center;
 }
 
 .metric-title {
@@ -787,15 +788,6 @@ textarea:focus {
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--text);
-}
-
-.progress-track {
-    width: 100%;
-    height: 4px;
-    background: var(--bg);
-    border-radius: 999px;
-    overflow: hidden;
-    margin-top: 0.5rem;
 }
 
 .progress-indicator {
@@ -1025,13 +1017,16 @@ textarea:focus {
         opacity: 0;
         transform: translateY(6px);
     }
+
     10% {
         opacity: 1;
         transform: translateY(0);
     }
+
     85% {
         opacity: 1;
     }
+
     100% {
         opacity: 0;
         transform: translateY(-4px);
@@ -1110,6 +1105,7 @@ textarea:focus {
 
 /* PRINT */
 @media print {
+
     .app-header,
     .controls-row button,
     .toolbar-actions,
