@@ -1,27 +1,5 @@
 "use strict";
 
-var SETUP_KEY = "TournaMate-setup";
-var THEME_KEY = "TournaMate-theme";
-
-const SCORING_PRESETS = {
-    FIDE: { win: 1, draw: 0.5 },
-    TEAM_POINTS: { win: 2, draw: 1 },
-    LEAGUE_3_1: { win: 3, draw: 1 }
-};
-
-const SAMPLE_DATA = {
-    TEAM: [
-        "Real Madrid", "Manchester City", "Bayern Munich",
-        "Paris Saint-Germain", "Arsenal FC", "FC Barcelona",
-        "Inter Milan", "Liverpool FC"
-    ],
-    SINGLES: [
-        "Magnus Carlsen", "Hikaru Nakamura", "Fabiano Caruana",
-        "Ding Liren", "Alireza Firouzja", "Gukesh D",
-        "Ian Nepomniachtchi", "Praggnanandhaa R"
-    ]
-};
-
 function toast(message) {
     const container = document.getElementById("toast-container");
     if (!container) return;
@@ -462,17 +440,6 @@ function updateNavState() {
 }
 
 window.updateNavState = updateNavState;
-window.showView = showView;
-window.openPairings = openPairings;
-window.openResults = openResults;
-window.openStandings = openStandings;
-
-document.getElementById("nav-setup").onclick = () => showView("setup", "setup");
-document.getElementById("nav-pairings").onclick = () => openPairings();
-document.getElementById("nav-results").onclick = () => openResults();
-document.getElementById("nav-standings").onclick = () => openStandings();
-document.getElementById("nav-brand").onclick = () => showView("setup", "setup");
-document.getElementById("jump-to-full-standings-btn").onclick = () => openStandings();
 
 function loadSetup() {
     const setup = getSavedSetup();

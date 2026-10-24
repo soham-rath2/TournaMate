@@ -7,18 +7,13 @@
   <meta name="description"
     content="TournaMate - Clean, modern tournament director software for Swiss and Round Robin formats.">
   <title>TournaMate</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
-    rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
   <header class="app-header">
     <div class="header-left">
-      <button type="button" class="brand" id="nav-brand" title="TournaMate Home">
+      <button type="button" class="brand" onclick="showView('setup', 'setup');" title="TournaMate Home">
         <svg class="brand-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
@@ -32,10 +27,11 @@
       </button>
 
       <nav class="nav-tabs" aria-label="Sections">
-        <button class="nav-tab active" data-target="setup" id="nav-setup">Setup</button>
-        <button class="nav-tab" data-target="pairings" id="nav-pairings" disabled>Pairings</button>
-        <button class="nav-tab" data-target="results" id="nav-results" disabled>Results</button>
-        <button class="nav-tab" data-target="standings" id="nav-standings" disabled>Standings</button>
+        <button class="nav-tab" id="tournament-btn">Tournaments</button>
+        <button class="nav-tab active" data-target="setup" onclick="showView('setup', 'setup' )">Setup</button>
+        <button class="nav-tab" data-target="pairings" onclick="openPairings()">Pairings</button>
+        <button class="nav-tab" data-target="results" onclick="openResults()">Results</button>
+        <button class="nav-tab" data-target="standings" onclick="openStandings()">Standings</button>
       </nav>
     </div>
 
@@ -204,7 +200,7 @@
               Next Round
             </button>
 
-            <button type="button" class="btn-outline" id="print-pairings-btn">
+            <button type="button" class="btn-outline" onclick="window.print()">
               Print
             </button>
           </div>
@@ -225,7 +221,7 @@
         <div class="panel">
           <div class="panel-header flex-between">
             <h3>Live Standings</h3>
-            <button type="button" class="btn-ghost btn-sm" id="jump-to-full-standings-btn">
+            <button type="button" class="btn-ghost btn-sm" onclick="openStandings()">
               Full Standings & Crosstable &rarr;
             </button>
           </div>
@@ -264,7 +260,7 @@
               <label for="results-round-select">Round</label>
               <select id="results-round-select"></select>
             </div>
-            <button type="button" class="btn-outline" id="print-results-btn">Print</button>
+            <button type="button" class="btn-outline" onclick="window.print()">Print</button>
           </div>
         </div>
 
@@ -319,7 +315,7 @@
           <div class="button-group">
             <button type="button" class="btn-outline btn-sm" id="export-csv-btn">Export CSV</button>
             <button type="button" class="btn-outline btn-sm" id="export-json-btn">Backup JSON</button>
-            <button type="button" class="btn-outline btn-sm" id="print-standings-btn">Print</button>
+            <button type="button" class="btn-outline btn-sm" onclick="window.print()">Print</button>
           </div>
         </div>
 
@@ -394,10 +390,10 @@
       <div class="dialog-body">
         <p class="subtext">Select how you want to reset the current tournament:</p>
         <div class="dialog-actions-column">
-          <button type="button" class="btn-outline full-width" id="reset-pairings-only-btn">
+          <button type="button" class="btn-outline full-width" onclick="resetPairingsOnly()">
             Reset Matches Only (Keep Roster)
           </button>
-          <button type="button" class="btn-outline danger-text full-width" id="reset-all-btn">
+          <button type="button" class="btn-outline danger-text full-width" onclick="resetAll()">
             Erase Everything (Factory Reset)
           </button>
         </div>
@@ -408,11 +404,36 @@
     </div>
   </div>
 
+  <!--Add exclusion of teams/players-->
+
+  <div class="dialog-backdrop" id="tournament-manager-modal" style="display: none;">
+    <div class="dialog-box" role="dialog" aria-modal="true">
+      <div class="dialog-header">
+        <h3>Manage Tournaments</h3>
+        <button type="button" class="btn-icon" id="manage-modal-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="dialog-body">
+        <div id="tournament-list-container">
+          <ul id="tournament-list"></ul>
+        </div>
+      </div>
+      <div class="dialog-footer">
+        <button type="button" class="btn-ghost" id="manage-modal-cancel">Close</button>
+        <button type="button" class="btn-solid" id="create-tournament">+ New Tournament</button>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST CONTAINER -->
   <div id="toast-container" class="toast-stack" aria-live="polite"></div>
 
-  <script src="setup.js"></script>
-  <script src="pairing.js"></script>
+  <script src="JS/config.js"></script>
+  <script src="JS/export.js"></script>
+  <script src="JS/models.js"></script>
+  <script src="JS/pairing.js"></script>
+  <script src="JS/setup.js"></script>
+  <script src="JS/render.js"></script>
+  <script src="JS/actions.js"></script>
 </body>
 
 </html>
