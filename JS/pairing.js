@@ -10,7 +10,7 @@ function load(key) {
 
 function persist() {
     localStorage.setItem(PAIRING_KEY, JSON.stringify(tournament));
-    updateNavState();
+    if (typeof updateNavState === "function") updateNavState();
     syncUndoRedo();
 }
 
@@ -97,7 +97,7 @@ function resetAll() {
     }
 }
 
-function startPairings() {
+function startPairings(excluded = []) {
     selectedRound = 1;
     resultsSelectedRound = 1;
     setup = load(SETUP_KEY);
@@ -142,22 +142,22 @@ function startPairings() {
     tournament = load(PAIRING_KEY);
     if (!tournament || !tournament.rounds || !tournament.rounds[1]) {
         tournament = { rounds: {} };
-        generateRound(1);
+        generateRound(1, excluded);
         persist();
     }
 
     updateRoundSelectors();
-    document.getElementById("generate-round-btn").onclick = handleNextRound;
-    updateNavState();
+    document.getElementById("generate-round-btn").onclick = () => openExcludeModal(false);
+    if (typeof updateNavState === "function") updateNavState();
     syncUndoRedo();
     renderAll();
     return true;
 }
 
 function renderAll() {
-    render();
-    renderResults();
-    renderDetailedStandings();
+    if (typeof render === "function") render();
+    if (typeof renderResults === "function") renderResults();
+    if (typeof renderDetailedStandings === "function") renderDetailedStandings();
 }
 
 function updateRoundSelectors() {
@@ -306,8 +306,10 @@ function hasPlayedBefore(p1, p2) {
     return false;
 }
 
-function generateSwiss(roundNum) {
-    const pool = [...computeStandings().map((s) => s.name)];
+function generateSwiss(roundNum, excluded = []) {
+    const excludeSet = new Set(excluded);
+    const pool = [...computeStandings().map((s) => s.name)].filter((name) => !excludeSet.has(name));
+    if (pool.length < 2) return [];
     const matches = [];
     let byePlayer = null;
 
@@ -365,8 +367,10 @@ function findSwissPairs(pool) {
     return solve(new Set(), [], true) || solve(new Set(), [], false) || [];
 }
 
-function generateRoundRobin(roundNum) {
-    const list = [...participants];
+function generateRoundRobin(roundNum, excluded = []) {
+    const excludeSet = new Set(excluded);
+    const list = participants.filter((participant) => !excludeSet.has(participant));
+    if (list.length < 2) return [];
     if (list.length % 2 !== 0) list.push("BYE");
 
     const n = list.length;
@@ -387,7 +391,7 @@ function generateRoundRobin(roundNum) {
         if (p1 === "BYE") {
             matches.push({ id: `${roundNum}-${i + 1}`, p1: p2, p2: "BYE", result: "1-0" });
         } else if (p2 === "BYE") {
-            matches.push({ id: `${roundNum}-${i + 1}`, p1, p2: "BYE", result: "1-0" });
+            matches.push({ id: `${roundNum}-${i + 1}`, p1, p2, result: "1-0" });
         } else {
             matches.push({ id: `${roundNum}-${i + 1}`, p1, p2, result: null });
         }
@@ -396,16 +400,27 @@ function generateRoundRobin(roundNum) {
     return matches;
 }
 
-function generateRound(roundNum) {
+function generateRound(roundNum, excluded = []) {
+    if (!tournament || !tournament.rounds) {
+        tournament = { rounds: {} };
+    }
     if (!tournament.rounds[roundNum]) {
         tournament.rounds[roundNum] = pairingSystem === "ROUND_ROBBIN"
-            ? generateRoundRobin(roundNum)
-            : generateSwiss(roundNum);
+            ? generateRoundRobin(roundNum, excluded)
+            : generateSwiss(roundNum, excluded);
     }
 }
 
-function handleNextRound() {
-    const maxRound = Math.max(1, ...Object.keys(tournament.rounds).map(Number));
+function handleNextRound(excludeList = [], skipPendingConfirm = false) {
+    if (!tournament || !tournament.rounds) {
+        tournament = load(PAIRING_KEY);
+        if (!tournament || !tournament.rounds) {
+            if (!startPairings()) return;
+        }
+    }
+
+    const roundsKeys = Object.keys(tournament.rounds || {});
+    const maxRound = roundsKeys.length > 0 ? Math.max(1, ...roundsKeys.map(Number)) : 1;
 
     if (maxRound >= totalRounds) {
         window.showToast?.(`All ${totalRounds} rounds generated`);
@@ -415,13 +430,42 @@ function handleNextRound() {
     const currentMatches = tournament.rounds[maxRound] || [];
     const pending = currentMatches.filter((m) => m.p2 !== "BYE" && !m.result).length;
 
-    if (pending > 0 && !confirm(`Round ${maxRound} has ${pending} pending match(es). Proceed?`)) {
+    if (!skipPendingConfirm && pending > 0 && !confirm(`Round ${maxRound} has ${pending} pending match(es). Proceed?`)) {
+        return;
+    }
+
+    const excluded = Array.isArray(excludeList)
+        ? excludeList
+        : (excludeList instanceof Set ? Array.from(excludeList) : []);
+
+    if (!participants || participants.length === 0) {
+        if (!setup) setup = load(SETUP_KEY) || {};
+        mode = setup.mode || mode || "TEAM";
+        participants = (mode === "SINGLES" ? setup.players : setup.teams) || [];
+    }
+
+    if (!participants || participants.length === 0) {
+        const pSet = new Set();
+        if (tournament?.rounds) {
+            Object.values(tournament.rounds).forEach((round) => {
+                round.forEach((m) => {
+                    if (m.p1 && m.p1 !== "BYE") pSet.add(m.p1);
+                    if (m.p2 && m.p2 !== "BYE") pSet.add(m.p2);
+                });
+            });
+        }
+        participants = Array.from(pSet);
+    }
+
+    const activeCount = participants.filter((p) => !excluded.includes(p)).length;
+    if (activeCount < 2) {
+        window.showToast?.("At least 2 active participants required to generate a round");
         return;
     }
 
     pushHistory();
     const nextRound = maxRound + 1;
-    generateRound(nextRound);
+    generateRound(nextRound, excluded);
     persist();
 
     selectedRound = nextRound;
@@ -440,6 +484,174 @@ function setResult(roundNum, matchIndex, result) {
     persist();
     renderAll();
 }
+
+const excludeConfirmBtn = document.getElementById("exclude-confirm");
+const excludeCancelBtn = document.getElementById("exclude-cancel");
+const excludeCloseBtn = document.getElementById("exclude-modal-close");
+const generateRoundBtn = document.getElementById("generate-round-btn");
+const excludeNames = new Set();
+let isInitialRoundModal = false;
+
+function openExcludeModal(isInitial = false) {
+    if (!setup) {
+        setup = load(SETUP_KEY) || {};
+    }
+
+    mode = setup.mode || mode || "TEAM";
+    totalRounds = Number(setup.rounds || totalRounds || 5);
+    pairingSystem = setup.pairingSystem || pairingSystem || "SWISS";
+
+    if (!participants || participants.length === 0) {
+        participants = (mode === "SINGLES" ? setup.players : setup.teams) || [];
+    }
+
+    tournament = load(PAIRING_KEY);
+    const hasExistingRounds = Boolean(tournament?.rounds && tournament.rounds[1]);
+    isInitialRoundModal = (isInitial === true) || !hasExistingRounds;
+
+    if (isInitialRoundModal) {
+        if (!participants || participants.length === 0) {
+            setup = load(SETUP_KEY) || {};
+            participants = (mode === "SINGLES" ? setup.players : setup.teams) || [];
+        }
+    } else {
+        if (!participants || participants.length === 0) {
+            const pSet = new Set();
+            if (tournament?.rounds) {
+                Object.values(tournament.rounds).forEach((round) => {
+                    round.forEach((m) => {
+                        if (m.p1 && m.p1 !== "BYE") pSet.add(m.p1);
+                        if (m.p2 && m.p2 !== "BYE") pSet.add(m.p2);
+                    });
+                });
+            }
+            participants = Array.from(pSet);
+        }
+
+        const roundsKeys = Object.keys(tournament.rounds || {});
+        const maxRound = roundsKeys.length > 0 ? Math.max(1, ...roundsKeys.map(Number)) : 1;
+
+        if (maxRound >= totalRounds) {
+            window.showToast?.(`All ${totalRounds} rounds generated`);
+            return;
+        }
+
+        const currentMatches = tournament.rounds[maxRound] || [];
+        const pending = currentMatches.filter((m) => m.p2 !== "BYE" && !m.result).length;
+
+        if (pending > 0 && !confirm(`Round ${maxRound} has ${pending} pending match(es). Proceed?`)) {
+            return;
+        }
+    }
+
+    const modal = document.getElementById("exclude-participant-modal");
+    const list = document.getElementById("exclude-participant-list");
+
+    if (!modal || !list) {
+        if (isInitialRoundModal) {
+            if (typeof showView === "function") showView("pairings", "pairings");
+            startPairings([]);
+        } else {
+            handleNextRound([]);
+        }
+        return;
+    }
+
+    excludeNames.clear();
+    list.replaceChildren();
+
+    const isSingles = mode === "SINGLES";
+    const roundLabel = isInitialRoundModal ? "Round 1" : "the next round";
+    const titleEl = document.getElementById("exclude-title");
+    if (titleEl) {
+        titleEl.textContent = isSingles ? "Exclude Players" : "Exclude Teams";
+    }
+    const descEl = document.querySelector(".exclude-description");
+    if (descEl) {
+        descEl.textContent = isSingles
+            ? `Select players to sit out/exclude from ${roundLabel}.`
+            : `Select teams to sit out/exclude from ${roundLabel}.`;
+    }
+
+    const confirmBtn = document.getElementById("exclude-confirm");
+    if (confirmBtn) {
+        confirmBtn.textContent = isInitialRoundModal ? "Start Tournament" : "Generate Round";
+    }
+
+    const names = [...participants];
+    if (names.length === 0) {
+        if (isInitialRoundModal) {
+            if (typeof showView === "function") showView("pairings", "pairings");
+            startPairings([]);
+        } else {
+            handleNextRound([]);
+        }
+        return;
+    }
+
+    names.forEach((name) => {
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.addEventListener("change", () => {
+            if (input.checked) excludeNames.add(name);
+            else excludeNames.delete(name);
+        });
+
+        label.append(input, document.createTextNode(" " + name));
+        list.appendChild(label);
+    });
+
+    modal.style.display = "flex";
+}
+
+function closeExcludeModal() {
+    const modal = document.getElementById("exclude-participant-modal");
+    if (modal) {
+        modal.style.display = "none";
+    }
+}
+
+if (excludeConfirmBtn) {
+    excludeConfirmBtn.onclick = () => {
+        const activeCount = participants.filter((p) => !excludeNames.has(p)).length;
+        if (activeCount < 2) {
+            window.showToast?.("At least 2 active participants required to generate a round");
+            return;
+        }
+        closeExcludeModal();
+        const excluded = Array.from(excludeNames);
+        if (isInitialRoundModal) {
+            if (typeof showView === "function") showView("pairings", "pairings");
+            startPairings(excluded);
+        } else {
+            handleNextRound(excluded, true);
+        }
+    };
+}
+
+if (excludeCancelBtn) {
+    excludeCancelBtn.onclick = closeExcludeModal;
+}
+
+if (excludeCloseBtn) {
+    excludeCloseBtn.onclick = closeExcludeModal;
+}
+
+const modalElem = document.getElementById("exclude-participant-modal");
+if (modalElem) {
+    modalElem.onclick = (e) => {
+        if (e.target === modalElem) closeExcludeModal();
+    };
+}
+
+if (generateRoundBtn) {
+    generateRoundBtn.onclick = () => openExcludeModal(false);
+}
+
+window.openExcludeModal = openExcludeModal;
+window.closeExcludeModal = closeExcludeModal;
+window.handleNextRound = handleNextRound;
 
 function updateAnalytics() {
     let total = 0;
@@ -465,5 +677,3 @@ function updateAnalytics() {
 }
 
 window.startPairings = startPairings;
-window.renderResults = renderResults;
-window.renderDetailedStandings = renderDetailedStandings;

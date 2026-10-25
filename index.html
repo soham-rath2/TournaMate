@@ -196,7 +196,7 @@
               <select id="round-select"></select>
             </div>
 
-            <button type="button" id="generate-round-btn" class="btn-solid">
+            <button type="button" id="generate-round-btn" class="btn-solid" onclick="openExcludeModal(false)">
               Next Round
             </button>
 
@@ -404,8 +404,7 @@
     </div>
   </div>
 
-  <!--Add exclusion of teams/players-->
-
+  <!-- TOURNAMENT MANAGER MODAL -->
   <div class="dialog-backdrop" id="tournament-manager-modal" style="display: none;">
     <div class="dialog-box" role="dialog" aria-modal="true">
       <div class="dialog-header">
@@ -420,6 +419,24 @@
       <div class="dialog-footer">
         <button type="button" class="btn-ghost" id="manage-modal-cancel">Close</button>
         <button type="button" class="btn-solid" id="create-tournament">+ New Tournament</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXCLUDE PARTICIPANTS MODAL -->
+  <div class="dialog-backdrop" id="exclude-participant-modal" style="display: none;">
+    <div class="dialog-box" role="dialog" aria-modal="true" aria-labelledby="exclude-title">
+      <div class="dialog-header">
+        <h3 id="exclude-title">Exclude Teams/Players</h3>
+        <button type="button" class="btn-icon" id="exclude-modal-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="dialog-body">
+        <p class="exclude-description">Select participants to sit out/exclude from the next round.</p>
+        <div id="exclude-participant-list"></div>
+      </div>
+      <div class="dialog-footer">
+        <button type="button" class="btn-ghost" id="exclude-cancel">Cancel</button>
+        <button type="button" class="btn-solid" id="exclude-confirm">Generate Round</button>
       </div>
     </div>
   </div>

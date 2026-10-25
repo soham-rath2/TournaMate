@@ -282,3 +282,6 @@ function checkCompletion(standings) {
     }
 }
 
+window.renderResults = renderResults;
+window.renderDetailedStandings = renderDetailedStandings;
+

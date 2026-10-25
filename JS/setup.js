@@ -370,9 +370,14 @@ formElements.startButton.onclick = () => {
     saveSetup();
     localStorage.removeItem("TournaMate-pairings");
     localStorage.removeItem("TournaMate-history");
+    if (typeof tournament !== "undefined") tournament = null;
 
     updateNavState();
-    openPairings();
+    if (typeof window.openExcludeModal === "function") {
+        window.openExcludeModal(true);
+    } else {
+        openPairings();
+    }
 };
 
 [

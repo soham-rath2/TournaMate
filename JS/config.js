@@ -4,19 +4,19 @@ var PAIRING_KEY = "TournaMate-pairings";
 
 
 
-let setup = null;
-let tournament = null;
-let participants = [];
-let selectedRound = 1;
-let resultsSelectedRound = 1;
-let pointsWin = 2;
-let pointsDraw = 1;
-let totalRounds = 5;
-let mode = "TEAM";
-let pairingSystem = "SWISS";
+var setup = null;
+var tournament = null;
+var participants = [];
+var selectedRound = 1;
+var resultsSelectedRound = 1;
+var pointsWin = 2;
+var pointsDraw = 1;
+var totalRounds = 5;
+var mode = "TEAM";
+var pairingSystem = "SWISS";
 
-let undoStack = [];
-let redoStack = [];
+var undoStack = [];
+var redoStack = [];
 
 const SCORING_PRESETS = {
     FIDE: { win: 1, draw: 0.5 },
