@@ -140,7 +140,7 @@ function renderDetailedStandings() {
         tdRank.textContent = idx + 1;
 
         const tdName = document.createElement("td");
-        tdName.innerHTML = `<strong>${st.name}</strong>`;
+        tdName.textContent = st.name;
 
         const tdP = document.createElement("td");
         tdP.textContent = st.played;
@@ -200,7 +200,7 @@ function renderCrosstable(standings) {
     htr.appendChild(thPts);
     thead.appendChild(htr);
 
-    const h2h = {};
+    const h2h = new Map();
     if (tournament?.rounds) {
         Object.values(tournament.rounds).forEach((roundMatches) => {
             roundMatches.forEach(({ p1, p2, result }) => {
@@ -261,6 +261,7 @@ function renderCrosstable(standings) {
 function checkCompletion(standings) {
     const banner = document.getElementById("champion-banner");
     if (!banner) return;
+
 
     const maxRound = Math.max(1, ...Object.keys(tournament.rounds || {}).map(Number));
     if (maxRound < totalRounds) {
